@@ -1,0 +1,38 @@
+micronaut:
+  application:
+    name: msDepositMicronaut
+datasources:
+  default:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    db-type: mysql
+    url: jdbc:mysql://localhost:3306/example
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+    schema-generate: CREATE_DROP
+    dialect: MYSQLDialect
+
+jpa:
+  default:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+netty:
+  default:
+    allocator:
+      max-order: 3
+jpa.default.properties.hibernate.hbm2ddl.auto: update
+
+kafka:
+  bootstrap:
+    servers: localhost:9092
+  producer:
+    key:
+      serializer: org.apache.kafka.common.serialization.StringSerializer
+    value:
+      serializer: org.apache.kafka.common.serialization.StringSerializer
+  consumer:
+    key:
+      deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value:
+      deserializer: org.apache.kafka.common.serialization.StringDeserializer
