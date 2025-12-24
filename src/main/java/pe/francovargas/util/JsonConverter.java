@@ -10,8 +10,12 @@ public class JsonConverter {
     private JsonConverter() {
     }
 
-    public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
-        return objectMapper.convertValue(fromValue, toValueType);
+    public static <T> T fromJson(String fromValue, Class<T> toValueType) {
+        try {
+            return objectMapper.readValue(fromValue, toValueType);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
     }
 
     public static String toJson(Object value) {
