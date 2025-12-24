@@ -1,4 +1,6 @@
 micronaut:
+  server:
+    port: 8090
   application:
     name: msDepositMicronaut
 datasources:

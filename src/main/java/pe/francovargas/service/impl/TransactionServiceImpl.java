@@ -1,10 +1,9 @@
 package pe.francovargas.service.impl;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.Completable;
 import jakarta.inject.Singleton;
 import lombok.AllArgsConstructor;
-import pe.francovargas.dao.TransactionDao;
+import pe.francovargas.dao.AccountDao;
 import pe.francovargas.kafka.producer.ExternalProducer;
 import pe.francovargas.model.domain.Transaction;
 import pe.francovargas.service.TransactionService;
@@ -14,23 +13,25 @@ import pe.francovargas.util.JsonConverter;
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
-	private final TransactionDao transactionDao;
+	private final AccountDao accountDao;
 	private final ExternalProducer externalProducer;
 
 //	private DepositEventProducer eventProducer;
 	
 	@Override
-	public Single<Transaction> save(Transaction transaction) {
-		return transactionDao.save(transaction)
-				.flatMap(transaction1 -> externalProducer.sendMessage(
-							JsonConverter.toJson(transaction1))
-						.map(response -> transaction1)
-				);
-	}
-
-	@Override
-	public Observable<Transaction> findAll() {
-		return transactionDao.findAll();
+	public Completable save(Transaction transaction) {
+		return accountDao.findById(transaction.getIdAccount())
+				.filter(account -> account.getCurrency() == transaction.getCurrency())
+				.map(account -> {
+					double newAmount = switch (transaction.getType()) {
+						case DEPOSIT -> account.getTotalAmount() + transaction.getAmount();
+						case WITHDRAWAL -> account.getTotalAmount() - transaction.getAmount();
+                    };
+					account.setTotalAmount(newAmount);
+					return account;
+				})
+				.flatMapCompletable(accountDao::update)
+				.andThen(externalProducer.sendMessage(JsonConverter.toJson(transaction)).ignoreElement());
 	}
 
 }

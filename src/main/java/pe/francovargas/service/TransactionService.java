@@ -1,12 +1,10 @@
 package pe.francovargas.service;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.Completable;
 import pe.francovargas.model.domain.Transaction;
 
 public interface TransactionService {
 
-    Single<Transaction> save(Transaction transaction);
+    Completable save(Transaction transaction);
 
-    Observable<Transaction> findAll();
 }
